@@ -5,19 +5,16 @@ let query = '';
 
 function loadCategories() {
     
-    fetch(BASE_URL + '/api/v1/category/all', {
-        method: 'POST', // or 'PUT'
+    fetch(BASE_URL + '/categories', {
+        method: 'GET', // or 'PUT'
         headers: {
             'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({token:localStorage.getItem("token")}),
+        }
     })
         .then(response => response.json())
         .then(data => {
             console.log('Success:', data);
-            if(data.success) {
-                renderCategories(data.categories);
-            }
+                renderCategories(data);
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -27,20 +24,22 @@ function loadCategories() {
 function loadProducts() {
     const data = { token:localStorage.getItem("token") };
     if(window.location.search) {
-        data.categoryId = window.location.search.split("=")[1];
+        data.id = window.location.search.split("=")[1];
     }
-    fetch(BASE_URL + '/api/v1/product/all', {
-        method: 'POST', // or 'PUT'
+    fetch(BASE_URL + '/products', {
+        method: 'GET', // or 'PUT'
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        
+        // params:{'name':'phone'}
+        // body: JSON.stringify(data),
     })
         .then(response => response.json())
         .then(data => {
-            if(data.success) {
-                renderProducts(data.products);
-            }
+            console.log("Data",data);
+                renderProducts(data);
+            
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -59,12 +58,12 @@ function renderCategories(categories) {
 function renderProducts(products) {
     let productListHtml = '';
     for(i = 0; i < products.length; i++) {
-        productListHtml += '<a class="product-item text-decoration-none d-inline-block" href="productDetails.html?productId=' + products[i].productId + '">'
+        productListHtml += '<a class="product-item text-decoration-none d-inline-block" href="productDetails.html?productId=' + products[i].id + '">'
         + '<div class="product-img">'
         + '<img src="https://img.favpng.com/8/17/0/product-design-clip-art-logo-food-png-favpng-TsCQEsJH2LUYN3d5Q6RzrTsqL.jpg">'
         + '</div>'
         + '<div class="product-name text-center">' + products[i].name + '</div>'
-        + '<div class="product-price text-center">&#8377; ' + products[i].price + '</div>'
+        + '<div class="product-price text-center">&#8377; ' + products[i].cost + '</div>'
         + '</a>';
     }
 

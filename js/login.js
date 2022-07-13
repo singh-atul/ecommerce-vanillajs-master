@@ -8,6 +8,9 @@ const loginUsername = document.getElementById("loginUsername");
 const loginPassword = document.getElementById("loginPassword");
 const signupUsername = document.getElementById("signupUsername");
 const signupPassword = document.getElementById("signupPassword");
+const signupEmail = document.getElementById("signupEmail");
+
+
 const authErrMsg = document.getElementById("authErrMsg");
 
 function showSignup() {
@@ -19,7 +22,7 @@ function showLogin() {
 	signupForm.classList.add('d-none');
 	loginForm.classList.remove('d-none');
 }
-
+const BASE_URL = "https://ecommce-be.herokuapp.com/ecomm/api/v1"
 function loginFn() {
 	if (loginUsername.value == "") {
 		updateAuthErrorMsg("Username should not be empty");
@@ -30,7 +33,7 @@ function loginFn() {
             username: loginUsername.value,
             password: loginPassword.value
         };
-		fetch(BASE_URL + '/api/v1/user/login', {
+		fetch(BASE_URL + '/auth/signin', {
 			method: 'POST', // or 'PUT'
 			headers: {
 				'Content-Type': 'application/json',
@@ -40,10 +43,12 @@ function loginFn() {
 			.then(response => response.json())
 			.then(data => {
 				console.log('Success:', data);
-				if(data.success) {
-                    localStorage.setItem("username", data.data.username)
-                    localStorage.setItem("userId", data.data.userId);
-					          localStorage.setItem("token", data.data.token);
+				if(data.accessToken) {
+					console.log("##")
+                    localStorage.setItem("username", data.username)
+                    localStorage.setItem("userId", data.id);
+					localStorage.setItem("token", data.accessToken);
+					localStorage.setItem("email", data.email);
 					
                     window.location.href = "index.html";
                 } else {
@@ -64,9 +69,10 @@ function signupFn() {
 	} else {
 		const data = {
             username: signupUsername.value,
-            password: signupPassword.value
+            password: signupPassword.value,
+			email:signupEmail.value
         };
-		fetch(BASE_URL + '/api/v1/user/signup', {
+		fetch(BASE_URL + '/auth/signup', {
 			method: 'POST', // or 'PUT'
 			headers: {
 				'Content-Type': 'application/json',
@@ -76,13 +82,12 @@ function signupFn() {
 			.then(response => response.json())
 			.then(data => {
 				console.log('Success:', data);
-				if(data.success) {
-                    localStorage.setItem("username", data.data.username)
-                    localStorage.setItem("userId", data.data.userId);
-                    window.location.href = "index.html";
-                } else {
-					updateAuthErrorMsg(data.msg);
-				}
+                    localStorage.setItem("username", data.username)
+                    localStorage.setItem("userId", data.id);
+					localStorage.setItem("email", data.email);
+					localStorage.setItem("token", data.accessToken);
+					window.location.href = "index.html";
+                
 			})
 			.catch((error) => {
 				console.error('Error:', error);
