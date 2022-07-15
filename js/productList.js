@@ -1,6 +1,10 @@
 const categoryList = document.getElementById("categoryList");
 const productList = document.getElementById("productList");
 const searchInput = document.getElementById("searchInput");
+const minPrice = document.getElementById("minPrice");
+const maxPrice = document.getElementById("maxPrice");
+const clear  = document.getElementById("clear");
+
 let query = '';
 
 function loadCategories() {
@@ -22,22 +26,22 @@ function loadCategories() {
 }
 
 function loadProducts() {
-    const data = { token:localStorage.getItem("token") };
+    const data = {};
     if(window.location.search) {
         data.id = window.location.search.split("=")[1];
     }
-    fetch(BASE_URL + '/products', {
+    let URI = '/products'
+    if(data.id){
+        URI = `/categories/${data.id}/products`
+    }
+    fetch(BASE_URL + URI, {
         method: 'GET', // or 'PUT'
         headers: {
             'Content-Type': 'application/json',
-        },
-        
-        // params:{'name':'phone'}
-        // body: JSON.stringify(data),
+        }
     })
         .then(response => response.json())
         .then(data => {
-            console.log("Data",data);
                 renderProducts(data);
             
         })
@@ -49,7 +53,7 @@ function loadProducts() {
 function renderCategories(categories) {
     let categoryListHtml = '';
     for(i = 0; i < categories.length; i++) {
-        categoryListHtml += '<a class="d-flex text-decoration-none" href="productList.html?categoryId=' + categories[i].categoryId + '">' + categories[i].name + '</a>';
+        categoryListHtml += '<a class="d-flex text-decoration-none" href="productList.html?categoryId=' + categories[i].id + '">' + categories[i].name + '</a>';
     }
 
     categoryList.innerHTML = categoryListHtml;
@@ -75,29 +79,39 @@ loadProducts();
 
 function searchProduct(e) {
     const data = {
-        query: e.target.value,
-        token:localStorage.getItem("token")
-    };
+        name: searchInput.value,
+        minCost: minPrice.value,
+        maxCost: maxPrice.value
 
+    };
+    
     if(window.location.search) {
-        data.categoryId = window.location.search.split("=")[1];
+        data.id = window.location.search.split("=")[1];
     }
-    fetch(BASE_URL + '/api/v1/product/all', {
-        method: 'POST', // or 'PUT'
+
+    let URI = '/products?'
+
+    fetch(BASE_URL + URI + new URLSearchParams(data)
+    , {
+        method: 'GET', // or 'PUT'
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        
     })
-        .then(response => response.json())
-        .then(data => {
-            if(data.success) {
-                renderProducts(data.products);
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+    .then(response => response.json())
+    .then(data => {
+            renderProducts(data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
 }
 
+function clearAllFilter(e){
+    window.location.reload();
+}
 searchInput.addEventListener("keyup", searchProduct);
+minPrice.addEventListener("change", searchProduct);
+maxPrice.addEventListener("change", searchProduct);
+clear.addEventListener("click",clearAllFilter);

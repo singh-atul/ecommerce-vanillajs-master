@@ -12,6 +12,7 @@ const signupEmail = document.getElementById("signupEmail");
 
 
 const authErrMsg = document.getElementById("authErrMsg");
+const succErrMsg = document.getElementById("succErrMsg");
 
 function showSignup() {
 	signupForm.classList.remove('d-none');
@@ -23,6 +24,38 @@ function showLogin() {
 	loginForm.classList.remove('d-none');
 }
 const BASE_URL = "https://ecommce-be.herokuapp.com/ecomm/api/v1"
+
+
+
+
+function createCart(){
+	const userId = localStorage.getItem('userId');
+	const token = localStorage.getItem('token');
+	console.log(userId,token,"33");
+	const headers = { 
+		'Content-Type': 'application/json',
+		'Authorization': `Bearer ${token}` };
+		fetch(BASE_URL + '/carts', {
+			method: 'POST', headers:headers,
+			body : JSON.stringify({userId}),
+		}).then(response => response.json() )
+		.then(data => 
+			{localStorage.setItem("cartId",data.id)
+			window.location.href = "index.html";}
+			
+		).catch((error) => {
+			console.error('Error:', error);
+		});
+		
+  }
+
+
+
+
+
+
+
+
 function loginFn() {
 	if (loginUsername.value == "") {
 		updateAuthErrorMsg("Username should not be empty");
@@ -44,13 +77,12 @@ function loginFn() {
 			.then(data => {
 				console.log('Success:', data);
 				if(data.accessToken) {
-					console.log("##")
                     localStorage.setItem("username", data.username)
                     localStorage.setItem("userId", data.id);
 					localStorage.setItem("token", data.accessToken);
 					localStorage.setItem("email", data.email);
-					
-                    window.location.href = "index.html";
+					createCart();
+                    
                 } else {
 					updateAuthErrorMsg(data.msg);
 				}
@@ -81,13 +113,14 @@ function signupFn() {
 		})
 			.then(response => response.json())
 			.then(data => {
-				console.log('Success:', data);
-                    localStorage.setItem("username", data.username)
-                    localStorage.setItem("userId", data.id);
-					localStorage.setItem("email", data.email);
-					localStorage.setItem("token", data.accessToken);
-					window.location.href = "index.html";
-                
+				// console.log('Success:', data);
+                //     localStorage.setItem("username", data.username)
+                //     localStorage.setItem("userId", data.id);
+				// 	localStorage.setItem("email", data.email);
+				// 	localStorage.setItem("token", data.accessToken);
+				// 	createCart();
+				// window.location.href = "index.html";
+				updateSuccErrorMsg(data.message);
 			})
 			.catch((error) => {
 				console.error('Error:', error);
@@ -97,6 +130,9 @@ function signupFn() {
 
 function updateAuthErrorMsg(msg) {
 	authErrMsg.innerText = msg;
+}
+function updateSuccErrorMsg(msg) {
+	succErrMsg.innerText = msg;
 }
 
 function redirectToHome() {
